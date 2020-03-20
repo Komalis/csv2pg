@@ -30,14 +30,15 @@ COPY_BUFFER = 2**13  # default read buffer size for copy_expert
 @click.option('--encoding', 'encoding', default='utf-8', show_default=True)
 @click.option('--overwrite', 'overwrite', is_flag=True, default=False, show_default=True, help='destroy table before inserting csv')
 @click.option('--buffer', 'buffer', type=int, default=COPY_BUFFER, show_default=True, help='size of the read buffer to be used by COPY FROM')
+@click.option('--sniff_buffer', 'sniff_buffer', type=int, default=SNIFFER_BUFFER, show_default=True, help='size of the read buffer to be used to sniff delimiters')
 @click.argument('table', nargs=1)
 @click.argument('filepath', nargs=1, type=click.Path())
 @click.version_option()
-def cli(hostname, port, dbname, username, password, verbose, header, delimiter, quotechar, escapechar, lineterminator, null, encoding, overwrite, buffer, table, filepath):
+def cli(hostname, port, dbname, username, password, verbose, header, delimiter, quotechar, escapechar, lineterminator, null, encoding, overwrite, buffer, sniff_buffer, table, filepath):
     """
     COPY FROM 'csv' TO 'postgres'
     """
-    dialect = sniff(filepath, encoding=encoding)
+    dialect = sniff(filepath, sniff_buffer=sniff_buffer, encoding=encoding)
     dialect.delimiter = delimiter or dialect.delimiter
     dialect.quotechar = quotechar or dialect.quotechar
     dialect.escapechar = escapechar or dialect.escapechar or dialect.quotechar
@@ -103,12 +104,12 @@ def check_database(uri):
     return status, server_version
 
 
-def sniff(filepath, encoding='utf-8'):
+def sniff(filepath, sniff_buffer, encoding='utf-8'):
     """
     Discovering csv parameters
     """
     with io.open(filepath, 'r', newline='', encoding=encoding) as f:
-        dialect = csv.Sniffer().sniff(f.read(SNIFFER_BUFFER))
+        dialect = csv.Sniffer().sniff(f.read(sniff_buffer))
     return dialect
 
 
