@@ -8,7 +8,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='csv2pg',
-    version='1.0.0b2',
+    version='1.1.0',
     url='https://github.com/DavidLacroix/csv2pg',
     description='A simple and fast cli application to load a csv into postgres',
     long_description=README,
